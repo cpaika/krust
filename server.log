@@ -1,0 +1,281 @@
+warning: unused import: `Serialize`
+ --> src/api/handlers.rs:6:26
+  |
+6 | use serde::{Deserialize, Serialize};
+  |                          ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `post`
+ --> src/api/server.rs:5:20
+  |
+5 |     routing::{get, post},
+  |                    ^^^^
+
+warning: unused import: `crate::models::pod::Pod`
+ --> src/storage/pod_store.rs:7:5
+  |
+7 | use crate::models::pod::Pod;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `tokio_stream::StreamExt`
+ --> src/storage/watch_store.rs:7:5
+  |
+7 | use tokio_stream::StreamExt;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:27:11
+   |
+27 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `params`
+  --> src/api/handlers.rs:28:11
+   |
+28 |     Query(params): Query<ListParams>,
+   |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:41:11
+   |
+41 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:48:11
+   |
+48 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `name`
+  --> src/api/handlers.rs:49:10
+   |
+49 |     Path(name): Path<String>,
+   |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:55:11
+   |
+55 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `name`
+  --> src/api/handlers.rs:56:10
+   |
+56 |     Path(name): Path<String>,
+   |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:63:11
+   |
+63 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `name`
+  --> src/api/handlers.rs:64:10
+   |
+64 |     Path(name): Path<String>,
+   |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+  --> src/api/handlers.rs:71:11
+   |
+71 |     State(state): State<AppState>,
+   |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `name`
+  --> src/api/handlers.rs:72:10
+   |
+72 |     Path(name): Path<String>,
+   |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:228:11
+    |
+228 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `params`
+   --> src/api/handlers.rs:229:11
+    |
+229 |     Query(params): Query<ListParams>,
+    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:242:11
+    |
+242 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:243:10
+    |
+243 |     Path(namespace): Path<String>,
+    |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `params`
+   --> src/api/handlers.rs:244:11
+    |
+244 |     Query(params): Query<ListParams>,
+    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:257:11
+    |
+257 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:258:10
+    |
+258 |     Path(namespace): Path<String>,
+    |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:265:11
+    |
+265 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:266:11
+    |
+266 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:266:22
+    |
+266 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:272:11
+    |
+272 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:273:11
+    |
+273 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:273:22
+    |
+273 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:280:11
+    |
+280 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:281:11
+    |
+281 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:281:22
+    |
+281 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:288:11
+    |
+288 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:289:11
+    |
+289 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:289:22
+    |
+289 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:296:11
+    |
+296 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `params`
+   --> src/api/handlers.rs:297:11
+    |
+297 |     Query(params): Query<ListParams>,
+    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:348:11
+    |
+348 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `pattern`
+   --> src/runtime/kubelet.rs:210:17
+    |
+210 |             let pattern = format!("k8s_*_{}_{}_{}", name, namespace, uid);
+    |                 ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pattern`
+
+warning: unused variable: `labels_str`
+  --> src/scheduler/mod.rs:74:13
+   |
+74 |         let labels_str: String = pod_row.get("labels");
+   |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_labels_str`
+
+warning: unused variable: `annotations_str`
+  --> src/scheduler/mod.rs:75:13
+   |
+75 |         let annotations_str: String = pod_row.get("annotations");
+   |             ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_annotations_str`
+
+warning: fields `label_selector`, `field_selector`, `limit`, and `continue_token` are never read
+  --> src/api/handlers.rs:14:5
+   |
+12 | pub struct ListParams {
+   |            ---------- fields in this struct
+13 |     #[serde(rename = "labelSelector")]
+14 |     label_selector: Option<String>,
+   |     ^^^^^^^^^^^^^^
+15 |     #[serde(rename = "fieldSelector")]
+16 |     field_selector: Option<String>,
+   |     ^^^^^^^^^^^^^^
+17 |     limit: Option<i32>,
+   |     ^^^^^
+18 |     #[serde(rename = "continue")]
+19 |     continue_token: Option<String>,
+   |     ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field `storage` is never read
+ --> src/controllers/mod.rs:4:5
+  |
+3 | pub struct ControllerManager {
+  |            ----------------- field in this struct
+4 |     storage: Storage,
+  |     ^^^^^^^
+
+warning: `krust` (lib) generated 42 warnings (run `cargo fix --lib -p krust` to apply 4 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running `target/debug/krust`
+[2m2025-08-22T06:49:07.973358Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting Krust - Kubernetes in Rust
+[2m2025-08-22T06:49:07.976898Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Running database migrations
+[2m2025-08-22T06:49:07.981200Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Starting scheduler
+[2m2025-08-22T06:49:07.983157Z[0m [33m WARN[0m [2mkrust[0m[2m:[0m Failed to start kubelet (Docker may not be available): error trying to connect: Connection refused (os error 61)
+[2m2025-08-22T06:49:07.983212Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting API server on port 6443
+[2m2025-08-22T06:49:07.984032Z[0m [32m INFO[0m [2mkrust::api::server[0m[2m:[0m Krust API server listening on 127.0.0.1:6443
+[2m2025-08-22T06:49:31.056362Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Scheduling pod default/demo-pod to node krust-node
