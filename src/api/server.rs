@@ -1,8 +1,9 @@
 use axum::{
+    body::Body,
     extract::State,
-    http::StatusCode,
-    response::Json,
-    routing::{get, post},
+    http::{HeaderMap, StatusCode},
+    response::{IntoResponse, Json, Response},
+    routing::{get},
     Router,
 };
 use serde_json::{json, Value};
@@ -28,7 +29,13 @@ pub async fn start_server(storage: Storage) -> anyhow::Result<()> {
         .route("/api", get(api_versions))
         .route("/api/v1", get(api_v1_resources))
         .route("/apis", get(api_groups))
+        .route("/apis/apps/v1", get(apps_v1_resources))
+        .route("/openapi/v2", get(openapi_v2))
+        .route("/swagger.json", get(openapi_v2))  // kubectl looks here too
+        .route("/openapi/v3", get(openapi_v3_discovery))
+        .route("/openapi/v3.0", get(openapi_v3_discovery))
         .nest("/api/v1", super::routes::v1_routes())
+        .nest("/apis/apps/v1", super::routes::apps_v1_routes())
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(state);
@@ -112,6 +119,14 @@ async fn api_v1_resources() -> Json<Value> {
                 "shortNames": ["svc"]
             },
             {
+                "name": "endpoints",
+                "singularName": "endpoints",
+                "namespaced": true,
+                "kind": "Endpoints",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["ep"]
+            },
+            {
                 "name": "nodes",
                 "singularName": "node",
                 "namespaced": false,
@@ -142,5 +157,85 @@ async fn api_groups() -> Json<Value> {
                 }
             }
         ]
+    }))
+}
+
+async fn apps_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "apps/v1",
+        "groupVersion": "apps/v1",
+        "resources": [
+            {
+                "name": "deployments",
+                "singularName": "deployment",
+                "namespaced": true,
+                "kind": "Deployment",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["deploy"]
+            },
+            {
+                "name": "replicasets",
+                "singularName": "replicaset",
+                "namespaced": true,
+                "kind": "ReplicaSet",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["rs"]
+            },
+            {
+                "name": "statefulsets",
+                "singularName": "statefulset",
+                "namespaced": true,
+                "kind": "StatefulSet",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["sts"]
+            },
+            {
+                "name": "daemonsets",
+                "singularName": "daemonset",
+                "namespaced": true,
+                "kind": "DaemonSet",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["ds"]
+            }
+        ]
+    }))
+}
+
+async fn openapi_v2(headers: HeaderMap) -> Response<Body> {
+    let json = super::openapi::generate_openapi_schema();
+    
+    // Check if client wants protobuf
+    if super::openapi::wants_protobuf(&headers) {
+        // Return proper protobuf format
+        match super::openapi_proto_v2::json_to_protobuf_v2(&json) {
+            Ok(protobuf_data) => {
+                return Response::builder()
+                    .status(StatusCode::OK)
+                    .header("Content-Type", "application/octet-stream")
+                    .body(Body::from(protobuf_data))
+                    .unwrap();
+            }
+            Err(e) => {
+                tracing::warn!("Failed to encode OpenAPI as protobuf: {}", e);
+                // Fall back to JSON
+            }
+        }
+    }
+    
+    // Return JSON as fallback
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("Content-Type", "application/json")
+        .body(Body::from(serde_json::to_string(&json).unwrap()))
+        .unwrap()
+}
+
+async fn openapi_v3_discovery() -> Json<Value> {
+    Json(json!({
+        "paths": {
+            "v3": "/openapi/v3",
+            "v3.0": "/openapi/v3.0"
+        }
     }))
 }

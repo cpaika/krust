@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package openapi.v2;
+
+// Simplified OpenAPI v2 protobuf schema
+// Based on github.com/googleapis/gnostic OpenAPIv2.proto
+
+message Document {
+  string swagger = 1;
+  Info info = 2;
+  string host = 3;
+  string base_path = 4;
+  repeated string schemes = 5;
+  repeated string consumes = 6;
+  repeated string produces = 7;
+  Paths paths = 8;
+  Definitions definitions = 9;
+}
+
+message Info {
+  string title = 1;
+  string version = 2;
+  string description = 3;
+}
+
+message Paths {
+  repeated NamedPathItem path = 1;
+}
+
+message NamedPathItem {
+  string name = 1;
+  PathItem value = 2;
+}
+
+message PathItem {
+  Operation get = 1;
+  Operation put = 2;
+  Operation post = 3;
+  Operation delete = 4;
+  Operation options = 5;
+  Operation head = 6;
+  Operation patch = 7;
+  repeated NamedParameter parameters = 8;
+}
+
+message Operation {
+  repeated string tags = 1;
+  string summary = 2;
+  string description = 3;
+  string operation_id = 4;
+  repeated string consumes = 5;
+  repeated string produces = 6;
+  repeated NamedParameter parameters = 7;
+  Responses responses = 8;
+  repeated string schemes = 9;
+}
+
+message NamedParameter {
+  string name = 1;
+  Parameter value = 2;
+}
+
+message Parameter {
+  oneof oneof {
+    BodyParameter body_parameter = 1;
+    NonBodyParameter non_body_parameter = 2;
+  }
+}
+
+message BodyParameter {
+  string description = 1;
+  string name = 2;
+  string in = 3;
+  bool required = 4;
+  Schema schema = 5;
+}
+
+message NonBodyParameter {
+  string description = 1;
+  string name = 2;
+  string in = 3;
+  bool required = 4;
+  string type = 5;
+  string format = 6;
+}
+
+message Responses {
+  repeated NamedResponse response = 1;
+}
+
+message NamedResponse {
+  string name = 1;
+  Response value = 2;
+}
+
+message Response {
+  string description = 1;
+  Schema schema = 2;
+}
+
+message Definitions {
+  repeated NamedSchema additional_properties = 1;
+}
+
+message NamedSchema {
+  string name = 1;
+  Schema value = 2;
+}
+
+message Schema {
+  string ref = 1;
+  string type = 2;
+  string format = 3;
+  string title = 4;
+  string description = 5;
+  Properties properties = 6;
+  AdditionalProperties additional_properties = 7 [lazy = true];
+  repeated string required = 8;
+  Items items = 9;
+  repeated Schema all_of = 10;
+}
+
+message Properties {
+  repeated NamedSchema additional_properties = 1;
+}
+
+message AdditionalProperties {
+  oneof oneof {
+    Schema schema = 1;
+    bool boolean = 2;
+  }
+}
+
+message Items {
+  repeated Schema schema = 1;
+}
+
+message Any {
+  string yaml = 1;
+}

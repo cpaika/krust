@@ -3,7 +3,7 @@ use bollard::{
     container::{Config, CreateContainerOptions, StartContainerOptions},
     Docker,
 };
-use serde_json::Value;
+use serde_json::{json, Value};
 use sqlx::Row;
 use std::collections::HashMap;
 use tracing::{error, info};
@@ -102,6 +102,13 @@ impl Kubelet {
                     continue;
                 }
                 
+                // Pull image if not present
+                info!("Pulling image {} if needed...", image);
+                if let Err(e) = self.pull_image(image).await {
+                    error!("Failed to pull image {}: {}", image, e);
+                    return Err(anyhow::anyhow!("Failed to pull image: {}", e));
+                }
+                
                 // Create container config
                 let mut config = Config {
                     image: Some(image.to_string()),
@@ -178,14 +185,149 @@ impl Kubelet {
         }
     }
 
+    async fn pull_image(&self, image: &str) -> Result<()> {
+        use bollard::image::CreateImageOptions;
+        use futures::StreamExt;
+        
+        // Parse image name and tag
+        let parts: Vec<&str> = image.split(':').collect();
+        let (image_name, tag) = if parts.len() > 1 {
+            (parts[0], parts[1])
+        } else {
+            (image, "latest")
+        };
+        
+        let options = CreateImageOptions {
+            from_image: image_name,
+            tag,
+            ..Default::default()
+        };
+        
+        info!("Pulling image {}:{}", image_name, tag);
+        
+        let mut stream = self.docker.create_image(Some(options), None, None);
+        
+        while let Some(result) = stream.next().await {
+            match result {
+                Ok(info) => {
+                    if let Some(status) = info.status {
+                        if let Some(progress) = info.progress {
+                            info!("Pull progress: {} - {}", status, progress);
+                        } else {
+                            info!("Pull status: {}", status);
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Error pulling image: {}", e);
+                    return Err(anyhow::anyhow!("Failed to pull image: {}", e));
+                }
+            }
+        }
+        
+        info!("Successfully pulled image {}:{}", image_name, tag);
+        Ok(())
+    }
+
     async fn update_pod_phase(&self, uid: &str, phase: &str) -> Result<()> {
-        sqlx::query(
-            "UPDATE pods SET phase = ? WHERE uid = ?"
+        // Get current pod to update status properly
+        let pod_row = sqlx::query(
+            "SELECT spec, status FROM pods WHERE uid = ?"
         )
-        .bind(phase)
         .bind(uid)
-        .execute(&*self.storage.pool)
+        .fetch_optional(&*self.storage.pool)
         .await?;
+        
+        if let Some(row) = pod_row {
+            let spec_str: String = row.get("spec");
+            let spec: Value = serde_json::from_str(&spec_str)?;
+            let mut status: Value = serde_json::from_str(&row.get::<String, _>("status"))?;
+            
+            // Update phase
+            status["phase"] = json!(phase);
+            
+            // Update conditions based on phase
+            let now = chrono::Utc::now().to_rfc3339();
+            if phase == "Running" {
+                // Update Ready condition
+                if let Some(conditions) = status["conditions"].as_array_mut() {
+                    for condition in conditions {
+                        if condition["type"] == "Ready" || condition["type"] == "ContainersReady" {
+                            condition["status"] = json!("True");
+                            condition["lastTransitionTime"] = json!(now);
+                            condition["reason"] = json!("ContainersReady");
+                            condition["message"] = json!("All containers are ready");
+                        } else if condition["type"] == "PodScheduled" {
+                            condition["status"] = json!("True");
+                            condition["lastTransitionTime"] = json!(now);
+                            condition["reason"] = json!("Scheduled");
+                            condition["message"] = json!("Pod has been scheduled to node");
+                        }
+                    }
+                }
+                
+                // Add container statuses
+                if let Some(containers) = spec["containers"].as_array() {
+                    let mut container_statuses = Vec::new();
+                    for container in containers {
+                        let name = container["name"].as_str().unwrap_or("container");
+                        container_statuses.push(json!({
+                            "name": name,
+                            "state": {
+                                "running": {
+                                    "startedAt": now
+                                }
+                            },
+                            "ready": true,
+                            "restartCount": 0,
+                            "image": container["image"],
+                            "imageID": container["image"],
+                            "containerID": format!("docker://{}", uid),
+                            "started": true
+                        }));
+                    }
+                    status["containerStatuses"] = json!(container_statuses);
+                }
+                
+                status["startTime"] = json!(now);
+                
+                // Assign pod IP (simplified - just use a unique IP)
+                let pod_ip = format!("10.244.0.{}", (uid.bytes().fold(0u8, |a, b| a.wrapping_add(b)) % 254) + 1);
+                status["podIP"] = json!(pod_ip.clone());
+                status["podIPs"] = json!([{"ip": pod_ip}]);
+                status["hostIP"] = json!("127.0.0.1");
+            } else if phase == "Failed" {
+                // Update conditions for failed state
+                if let Some(conditions) = status["conditions"].as_array_mut() {
+                    for condition in conditions {
+                        if condition["type"] == "Ready" || condition["type"] == "ContainersReady" {
+                            condition["status"] = json!("False");
+                            condition["lastTransitionTime"] = json!(now);
+                            condition["reason"] = json!("ContainersFailed");
+                            condition["message"] = json!("One or more containers failed");
+                        }
+                    }
+                }
+            }
+            
+            sqlx::query(
+                "UPDATE pods SET phase = ?, status = ? WHERE uid = ?"
+            )
+            .bind(phase)
+            .bind(status.to_string())
+            .bind(uid)
+            .execute(&*self.storage.pool)
+            .await?;
+        } else {
+            // Fallback to simple phase update
+            sqlx::query(
+                "UPDATE pods SET phase = ? WHERE uid = ?"
+            )
+            .bind(phase)
+            .bind(uid)
+            .execute(&*self.storage.pool)
+            .await?;
+        }
         
         Ok(())
     }

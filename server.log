@@ -1,3 +1,4 @@
+   Compiling krust v0.1.0 (/Users/cpaika/projects/krust)
 warning: unused import: `Serialize`
  --> src/api/handlers.rs:6:26
   |
@@ -6,11 +7,49 @@ warning: unused import: `Serialize`
   |
   = note: `#[warn(unused_imports)]` on by default
 
-warning: unused import: `post`
- --> src/api/server.rs:5:20
+warning: unused import: `std::collections::HashMap`
+ --> src/api/openapi_proto.rs:3:5
   |
-5 |     routing::{get, post},
-  |                    ^^^^
+3 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/api/openapi_proto_v2.rs:3:5
+  |
+3 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `http::StatusCode` and `response::Json`
+ --> src/api/routes.rs:2:5
+  |
+2 |     http::StatusCode,
+  |     ^^^^^^^^^^^^^^^^
+3 |     response::Json,
+  |     ^^^^^^^^^^^^^^
+
+warning: unused imports: `Value` and `json`
+ --> src/api/routes.rs:7:18
+  |
+7 | use serde_json::{json, Value};
+  |                  ^^^^  ^^^^^
+
+warning: unused import: `IntoResponse`
+ --> src/api/server.rs:5:16
+  |
+5 |     response::{IntoResponse, Json, Response},
+  |                ^^^^^^^^^^^^
+
+warning: unused import: `uuid::Uuid`
+ --> src/controllers/deployment_controller.rs:9:5
+  |
+9 | use uuid::Uuid;
+  |     ^^^^^^^^^^
+
+warning: unused import: `crate::Storage`
+ --> src/controllers/mod.rs:5:5
+  |
+5 | use crate::Storage;
+  |     ^^^^^^^^^^^^^^
 
 warning: unused import: `crate::models::pod::Pod`
  --> src/storage/pod_store.rs:7:5
@@ -25,209 +64,185 @@ warning: unused import: `tokio_stream::StreamExt`
   |     ^^^^^^^^^^^^^^^^^^^^^^^
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:27:11
+  --> src/api/handlers.rs:28:11
    |
-27 |     State(state): State<AppState>,
+28 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
    |
    = note: `#[warn(unused_variables)]` on by default
 
 warning: unused variable: `params`
-  --> src/api/handlers.rs:28:11
+  --> src/api/handlers.rs:29:11
    |
-28 |     Query(params): Query<ListParams>,
+29 |     Query(params): Query<ListParams>,
    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:41:11
+  --> src/api/handlers.rs:42:11
    |
-41 |     State(state): State<AppState>,
+42 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:48:11
+  --> src/api/handlers.rs:49:11
    |
-48 |     State(state): State<AppState>,
+49 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `name`
-  --> src/api/handlers.rs:49:10
+  --> src/api/handlers.rs:50:10
    |
-49 |     Path(name): Path<String>,
+50 |     Path(name): Path<String>,
    |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:55:11
+  --> src/api/handlers.rs:56:11
    |
-55 |     State(state): State<AppState>,
+56 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `name`
-  --> src/api/handlers.rs:56:10
+  --> src/api/handlers.rs:57:10
    |
-56 |     Path(name): Path<String>,
+57 |     Path(name): Path<String>,
    |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:63:11
+  --> src/api/handlers.rs:64:11
    |
-63 |     State(state): State<AppState>,
+64 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `name`
-  --> src/api/handlers.rs:64:10
+  --> src/api/handlers.rs:65:10
    |
-64 |     Path(name): Path<String>,
+65 |     Path(name): Path<String>,
    |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
 
 warning: unused variable: `state`
-  --> src/api/handlers.rs:71:11
+  --> src/api/handlers.rs:72:11
    |
-71 |     State(state): State<AppState>,
+72 |     State(state): State<AppState>,
    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `name`
-  --> src/api/handlers.rs:72:10
+  --> src/api/handlers.rs:73:10
    |
-72 |     Path(name): Path<String>,
+73 |     Path(name): Path<String>,
    |          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
 
 warning: unused variable: `state`
-   --> src/api/handlers.rs:228:11
+   --> src/api/handlers.rs:287:11
     |
-228 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `params`
-   --> src/api/handlers.rs:229:11
-    |
-229 |     Query(params): Query<ListParams>,
-    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
-
-warning: unused variable: `state`
-   --> src/api/handlers.rs:242:11
-    |
-242 |     State(state): State<AppState>,
+287 |     State(state): State<AppState>,
     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `namespace`
-   --> src/api/handlers.rs:243:10
-    |
-243 |     Path(namespace): Path<String>,
-    |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
-
-warning: unused variable: `params`
-   --> src/api/handlers.rs:244:11
-    |
-244 |     Query(params): Query<ListParams>,
-    |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
-
-warning: unused variable: `state`
-   --> src/api/handlers.rs:257:11
-    |
-257 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `namespace`
-   --> src/api/handlers.rs:258:10
-    |
-258 |     Path(namespace): Path<String>,
-    |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
-
-warning: unused variable: `state`
-   --> src/api/handlers.rs:265:11
-    |
-265 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `namespace`
-   --> src/api/handlers.rs:266:11
-    |
-266 |     Path((namespace, name)): Path<(String, String)>,
-    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
-
-warning: unused variable: `name`
-   --> src/api/handlers.rs:266:22
-    |
-266 |     Path((namespace, name)): Path<(String, String)>,
-    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
-
-warning: unused variable: `state`
-   --> src/api/handlers.rs:272:11
-    |
-272 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `namespace`
-   --> src/api/handlers.rs:273:11
-    |
-273 |     Path((namespace, name)): Path<(String, String)>,
-    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
-
-warning: unused variable: `name`
-   --> src/api/handlers.rs:273:22
-    |
-273 |     Path((namespace, name)): Path<(String, String)>,
-    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
-
-warning: unused variable: `state`
-   --> src/api/handlers.rs:280:11
-    |
-280 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `namespace`
-   --> src/api/handlers.rs:281:11
-    |
-281 |     Path((namespace, name)): Path<(String, String)>,
-    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
-
-warning: unused variable: `name`
-   --> src/api/handlers.rs:281:22
-    |
-281 |     Path((namespace, name)): Path<(String, String)>,
-    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
-
-warning: unused variable: `state`
    --> src/api/handlers.rs:288:11
     |
-288 |     State(state): State<AppState>,
-    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
-
-warning: unused variable: `namespace`
-   --> src/api/handlers.rs:289:11
-    |
-289 |     Path((namespace, name)): Path<(String, String)>,
+288 |     Path((namespace, name)): Path<(String, String)>,
     |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
 
 warning: unused variable: `name`
-   --> src/api/handlers.rs:289:22
+   --> src/api/handlers.rs:288:22
     |
-289 |     Path((namespace, name)): Path<(String, String)>,
+288 |     Path((namespace, name)): Path<(String, String)>,
     |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
 
 warning: unused variable: `state`
+   --> src/api/handlers.rs:295:11
+    |
+295 |     State(state): State<AppState>,
+    |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `namespace`
    --> src/api/handlers.rs:296:11
     |
-296 |     State(state): State<AppState>,
+296 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:296:22
+    |
+296 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `state`
+   --> src/api/handlers.rs:702:11
+    |
+702 |     State(state): State<AppState>,
     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
 warning: unused variable: `params`
-   --> src/api/handlers.rs:297:11
+   --> src/api/handlers.rs:703:11
     |
-297 |     Query(params): Query<ListParams>,
+703 |     Query(params): Query<ListParams>,
     |           ^^^^^^ help: if this is intentional, prefix it with an underscore: `_params`
 
 warning: unused variable: `state`
-   --> src/api/handlers.rs:348:11
+   --> src/api/handlers.rs:754:11
     |
-348 |     State(state): State<AppState>,
+754 |     State(state): State<AppState>,
     |           ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
 
-warning: unused variable: `pattern`
-   --> src/runtime/kubelet.rs:210:17
+warning: unused variable: `namespace`
+   --> src/api/handlers.rs:971:11
     |
-210 |             let pattern = format!("k8s_*_{}_{}_{}", name, namespace, uid);
+971 |     Path((namespace, name)): Path<(String, String)>,
+    |           ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/api/handlers.rs:971:22
+    |
+971 |     Path((namespace, name)): Path<(String, String)>,
+    |                      ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `generation`
+  --> src/controllers/deployment_controller.rs:47:17
+   |
+47 |             let generation: i64 = deployment_row.get("generation");
+   |                 ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_generation`
+
+warning: unused variable: `name`
+   --> src/controllers/deployment_controller.rs:111:74
+    |
+111 |     async fn update_deployment_status(&self, uid: &str, namespace: &str, name: &str) -> Result<()> {
+    |                                                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `rs_name`
+   --> src/controllers/deployment_controller.rs:126:17
+    |
+126 |             let rs_name: String = rs_row.get("name");
+    |                 ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_rs_name`
+
+warning: unused variable: `index`
+   --> src/controllers/replicaset_controller.rs:124:9
+    |
+124 |         index: i64
+    |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_index`
+
+warning: unused variable: `rs_uid`
+   --> src/controllers/replicaset_controller.rs:169:9
+    |
+169 |         rs_uid: &str,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_rs_uid`
+
+warning: unused variable: `namespace`
+   --> src/controllers/replicaset_controller.rs:216:57
+    |
+216 |     async fn update_replicaset_status(&self, uid: &str, namespace: &str, name: &str, replicas: i64) -> Result<()> {
+    |                                                         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_namespace`
+
+warning: unused variable: `name`
+   --> src/controllers/replicaset_controller.rs:216:74
+    |
+216 |     async fn update_replicaset_status(&self, uid: &str, namespace: &str, name: &str, replicas: i64) -> Result<()> {
+    |                                                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_name`
+
+warning: unused variable: `pattern`
+   --> src/runtime/kubelet.rs:352:17
+    |
+352 |             let pattern = format!("k8s_*_{}_{}_{}", name, namespace, uid);
     |                 ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pattern`
 
 warning: unused variable: `labels_str`
@@ -242,40 +257,97 @@ warning: unused variable: `annotations_str`
 75 |         let annotations_str: String = pod_row.get("annotations");
    |             ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_annotations_str`
 
-warning: fields `label_selector`, `field_selector`, `limit`, and `continue_token` are never read
-  --> src/api/handlers.rs:14:5
+warning: unused variable: `selector_map`
+   --> src/storage/endpoints_store.rs:252:17
+    |
+252 |             let selector_map = service_selector.as_object().unwrap();
+    |                 ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_selector_map`
+
+warning: unused variable: `endpoints`
+  --> src/storage/service_store.rs:84:17
    |
-12 | pub struct ListParams {
+84 |             let endpoints = json!({
+   |                 ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_endpoints`
+
+warning: fields `label_selector`, `field_selector`, `limit`, and `continue_token` are never read
+  --> src/api/handlers.rs:15:5
+   |
+13 | pub struct ListParams {
    |            ---------- fields in this struct
-13 |     #[serde(rename = "labelSelector")]
-14 |     label_selector: Option<String>,
+14 |     #[serde(rename = "labelSelector")]
+15 |     label_selector: Option<String>,
    |     ^^^^^^^^^^^^^^
-15 |     #[serde(rename = "fieldSelector")]
-16 |     field_selector: Option<String>,
+16 |     #[serde(rename = "fieldSelector")]
+17 |     field_selector: Option<String>,
    |     ^^^^^^^^^^^^^^
-17 |     limit: Option<i32>,
+18 |     limit: Option<i32>,
    |     ^^^^^
-18 |     #[serde(rename = "continue")]
-19 |     continue_token: Option<String>,
+19 |     #[serde(rename = "continue")]
+20 |     continue_token: Option<String>,
    |     ^^^^^^^^^^^^^^
    |
    = note: `#[warn(dead_code)]` on by default
 
-warning: field `storage` is never read
- --> src/controllers/mod.rs:4:5
-  |
-3 | pub struct ControllerManager {
-  |            ----------------- field in this struct
-4 |     storage: Storage,
-  |     ^^^^^^^
+warning: field `timestamps` is never read
+   --> src/api/handlers.rs:877:5
+    |
+873 | pub struct LogParams {
+    |            --------- field in this struct
+...
+877 |     timestamps: Option<bool>,
+    |     ^^^^^^^^^^
 
-warning: `krust` (lib) generated 42 warnings (run `cargo fix --lib -p krust` to apply 4 suggestions)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+warning: `krust` (lib) generated 46 warnings (run `cargo fix --lib -p krust` to apply 10 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.53s
      Running `target/debug/krust`
-[2m2025-08-22T06:49:07.973358Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting Krust - Kubernetes in Rust
-[2m2025-08-22T06:49:07.976898Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Running database migrations
-[2m2025-08-22T06:49:07.981200Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Starting scheduler
-[2m2025-08-22T06:49:07.983157Z[0m [33m WARN[0m [2mkrust[0m[2m:[0m Failed to start kubelet (Docker may not be available): error trying to connect: Connection refused (os error 61)
-[2m2025-08-22T06:49:07.983212Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting API server on port 6443
-[2m2025-08-22T06:49:07.984032Z[0m [32m INFO[0m [2mkrust::api::server[0m[2m:[0m Krust API server listening on 127.0.0.1:6443
-[2m2025-08-22T06:49:31.056362Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Scheduling pod default/demo-pod to node krust-node
+[2m2025-08-22T15:57:23.411415Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting Krust - Kubernetes in Rust
+[2m2025-08-22T15:57:23.414975Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Running database migrations
+[2m2025-08-22T15:57:23.416471Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Starting scheduler
+[2m2025-08-22T15:57:23.427076Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Connected to Docker daemon
+[2m2025-08-22T15:57:23.427288Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting kubelet
+[2m2025-08-22T15:57:23.427377Z[0m [32m INFO[0m [2mkrust::controllers::deployment_controller[0m[2m:[0m Starting deployment controller
+[2m2025-08-22T15:57:23.427394Z[0m [32m INFO[0m [2mkrust[0m[2m:[0m Starting API server on port 6443
+[2m2025-08-22T15:57:23.427362Z[0m [32m INFO[0m [2mkrust::controllers::endpoints_controller[0m[2m:[0m Starting endpoints controller
+[2m2025-08-22T15:57:23.427443Z[0m [32m INFO[0m [2mkrust::controllers::replicaset_controller[0m[2m:[0m Starting replicaset controller
+[2m2025-08-22T15:57:23.429383Z[0m [32m INFO[0m [2mkrust::api::server[0m[2m:[0m Krust API server listening on 127.0.0.1:6443
+[2m2025-08-22T15:57:45.144701Z[0m [31mERROR[0m [2mtower_http::trace::on_failure[0m[2m:[0m response failed [3mclassification[0m[2m=[0mStatus code: 503 Service Unavailable [3mlatency[0m[2m=[0m0 ms
+[2m2025-08-22T15:58:06.131317Z[0m [31mERROR[0m [2mtower_http::trace::on_failure[0m[2m:[0m response failed [3mclassification[0m[2m=[0mStatus code: 503 Service Unavailable [3mlatency[0m[2m=[0m0 ms
+[2m2025-08-22T15:59:38.004122Z[0m [31mERROR[0m [2mkrust::api::handlers[0m[2m:[0m Failed to create deployment: error returned from database: (code: 2067) UNIQUE constraint failed: deployments.name, deployments.namespace
+[2m2025-08-22T15:59:38.004416Z[0m [31mERROR[0m [2mtower_http::trace::on_failure[0m[2m:[0m response failed [3mclassification[0m[2m=[0mStatus code: 500 Internal Server Error [3mlatency[0m[2m=[0m0 ms
+[2m2025-08-22T15:59:38.005014Z[0m [31mERROR[0m [2mkrust::api::handlers[0m[2m:[0m Failed to create service: error returned from database: (code: 2067) UNIQUE constraint failed: services.name, services.namespace
+[2m2025-08-22T15:59:38.005034Z[0m [31mERROR[0m [2mtower_http::trace::on_failure[0m[2m:[0m response failed [3mclassification[0m[2m=[0mStatus code: 500 Internal Server Error [3mlatency[0m[2m=[0m0 ms
+[2m2025-08-22T15:59:49.772229Z[0m [32m INFO[0m [2mkrust::controllers::deployment_controller[0m[2m:[0m Creating ReplicaSet webapp-ac18ba6 for Deployment default/webapp
+[2m2025-08-22T15:59:49.778332Z[0m [32m INFO[0m [2mkrust::controllers::replicaset_controller[0m[2m:[0m ReplicaSet default/webapp-ac18ba6 needs 3 more pods
+[2m2025-08-22T15:59:49.782639Z[0m [32m INFO[0m [2mkrust::controllers::replicaset_controller[0m[2m:[0m Created pod webapp-ac18ba6-ba7d7367 for ReplicaSet default/webapp-ac18ba6
+[2m2025-08-22T15:59:49.785665Z[0m [32m INFO[0m [2mkrust::controllers::replicaset_controller[0m[2m:[0m Created pod webapp-ac18ba6-f11a1ded for ReplicaSet default/webapp-ac18ba6
+[2m2025-08-22T15:59:49.786004Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Scheduling pod default/webapp-ac18ba6-ba7d7367 to node krust-node
+[2m2025-08-22T15:59:49.788471Z[0m [32m INFO[0m [2mkrust::controllers::replicaset_controller[0m[2m:[0m Created pod webapp-ac18ba6-5ca5e4ed for ReplicaSet default/webapp-ac18ba6
+[2m2025-08-22T15:59:49.793580Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Scheduling pod default/webapp-ac18ba6-f11a1ded to node krust-node
+[2m2025-08-22T15:59:50.757077Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting pod default/webapp-ac18ba6-ba7d7367
+[2m2025-08-22T15:59:50.760577Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest if needed...
+[2m2025-08-22T15:59:50.760615Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:50.798203Z[0m [32m INFO[0m [2mkrust::scheduler[0m[2m:[0m Scheduling pod default/webapp-ac18ba6-5ca5e4ed to node krust-node
+[2m2025-08-22T15:59:51.581032Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Pulling from hashicorp/http-echo
+[2m2025-08-22T15:59:51.591298Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Digest: sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186
+[2m2025-08-22T15:59:51.591346Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Status: Image is up to date for hashicorp/http-echo:latest
+[2m2025-08-22T15:59:51.595985Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Successfully pulled image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:51.596104Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Creating container k8s_hello_webapp-ac18ba6-ba7d7367_default_de59d45d-7c5a-4f2e-80df-6625a4c97455 with image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:51.666803Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting container k8s_hello_webapp-ac18ba6-ba7d7367_default_de59d45d-7c5a-4f2e-80df-6625a4c97455
+[2m2025-08-22T15:59:51.878841Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting pod default/webapp-ac18ba6-f11a1ded
+[2m2025-08-22T15:59:51.881119Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest if needed...
+[2m2025-08-22T15:59:51.881158Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:52.279370Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Pulling from hashicorp/http-echo
+[2m2025-08-22T15:59:52.283709Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Digest: sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186
+[2m2025-08-22T15:59:52.283741Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Status: Image is up to date for hashicorp/http-echo:latest
+[2m2025-08-22T15:59:52.285400Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Successfully pulled image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:52.285462Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Creating container k8s_hello_webapp-ac18ba6-f11a1ded_default_61fc488f-c7d8-491b-a0a7-4516acdb2ed7 with image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:52.314517Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting container k8s_hello_webapp-ac18ba6-f11a1ded_default_61fc488f-c7d8-491b-a0a7-4516acdb2ed7
+[2m2025-08-22T15:59:54.509295Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting pod default/webapp-ac18ba6-5ca5e4ed
+[2m2025-08-22T15:59:54.518722Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest if needed...
+[2m2025-08-22T15:59:54.518808Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pulling image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:55.128940Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Pulling from hashicorp/http-echo
+[2m2025-08-22T15:59:55.136693Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Digest: sha256:fcb75f691c8b0414d670ae570240cbf95502cc18a9ba57e982ecac589760a186
+[2m2025-08-22T15:59:55.136752Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Pull status: Status: Image is up to date for hashicorp/http-echo:latest
+[2m2025-08-22T15:59:55.140353Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Successfully pulled image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:55.140472Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Creating container k8s_hello_webapp-ac18ba6-5ca5e4ed_default_b9096cff-e707-433c-996b-f14f7fd912b9 with image hashicorp/http-echo:latest
+[2m2025-08-22T15:59:55.207503Z[0m [32m INFO[0m [2mkrust::runtime::kubelet[0m[2m:[0m Starting container k8s_hello_webapp-ac18ba6-5ca5e4ed_default_b9096cff-e707-433c-996b-f14f7fd912b9

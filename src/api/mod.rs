@@ -1,3 +1,9 @@
 pub mod handlers;
+pub mod openapi;
+pub mod openapi_proto;
+pub mod openapi_proto_v2;
+pub mod pod_proxy;
+pub mod portforward;
+pub mod portforward_proxy;
 pub mod routes;
 pub mod server;

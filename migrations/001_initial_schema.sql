@@ -46,6 +46,21 @@ CREATE TABLE IF NOT EXISTS services (
     FOREIGN KEY (namespace) REFERENCES namespaces(name) ON DELETE CASCADE
 );
 
+-- Create endpoints table
+CREATE TABLE IF NOT EXISTS endpoints (
+    uid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    namespace TEXT NOT NULL DEFAULT 'default',
+    resource_version INTEGER NOT NULL DEFAULT 1,
+    creation_timestamp TEXT NOT NULL,
+    deletion_timestamp TEXT,
+    labels TEXT, -- JSON
+    annotations TEXT, -- JSON
+    subsets TEXT NOT NULL, -- JSON array of endpoint subsets
+    UNIQUE(name, namespace),
+    FOREIGN KEY (namespace) REFERENCES namespaces(name) ON DELETE CASCADE
+);
+
 -- Create deployments table
 CREATE TABLE IF NOT EXISTS deployments (
     uid TEXT PRIMARY KEY,
@@ -58,6 +73,26 @@ CREATE TABLE IF NOT EXISTS deployments (
     annotations TEXT, -- JSON
     spec TEXT NOT NULL, -- JSON
     status TEXT, -- JSON
+    generation INTEGER NOT NULL DEFAULT 1,
+    replicas INTEGER NOT NULL DEFAULT 1,
+    UNIQUE(name, namespace),
+    FOREIGN KEY (namespace) REFERENCES namespaces(name) ON DELETE CASCADE
+);
+
+-- Create replicasets table
+CREATE TABLE IF NOT EXISTS replicasets (
+    uid TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    namespace TEXT NOT NULL DEFAULT 'default',
+    resource_version INTEGER NOT NULL DEFAULT 1,
+    creation_timestamp TEXT NOT NULL,
+    deletion_timestamp TEXT,
+    labels TEXT, -- JSON
+    annotations TEXT, -- JSON
+    spec TEXT NOT NULL, -- JSON
+    status TEXT, -- JSON
+    owner_references TEXT, -- JSON array of ownerReferences
+    replicas INTEGER NOT NULL DEFAULT 1,
     UNIQUE(name, namespace),
     FOREIGN KEY (namespace) REFERENCES namespaces(name) ON DELETE CASCADE
 );
@@ -102,7 +137,9 @@ CREATE INDEX idx_pods_namespace ON pods(namespace);
 CREATE INDEX idx_pods_node ON pods(node_name);
 CREATE INDEX idx_pods_phase ON pods(phase);
 CREATE INDEX idx_services_namespace ON services(namespace);
+CREATE INDEX idx_endpoints_namespace ON endpoints(namespace);
 CREATE INDEX idx_deployments_namespace ON deployments(namespace);
+CREATE INDEX idx_replicasets_namespace ON replicasets(namespace);
 CREATE INDEX idx_events_resource ON events(resource_type, resource_uid);
 CREATE INDEX idx_events_timestamp ON events(timestamp);
 CREATE INDEX idx_watch_cursors_expires ON watch_cursors(expires_at);

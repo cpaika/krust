@@ -1,5 +1,15 @@
 use anyhow::Result;
-use krust::{api::server::start_server, runtime::Kubelet, scheduler::Scheduler, Storage};
+use krust::{
+    api::server::start_server, 
+    controllers::{
+        deployment_controller::DeploymentController,
+        endpoints_controller::EndpointsController,
+        replicaset_controller::ReplicaSetController,
+    },
+    runtime::Kubelet, 
+    scheduler::Scheduler, 
+    Storage
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -41,6 +51,30 @@ async fn main() -> Result<()> {
             tracing::warn!("Failed to start kubelet (Docker may not be available): {}", e);
         }
     }
+    
+    // Start endpoints controller in background
+    let endpoints_controller = EndpointsController::new(storage.clone());
+    tokio::spawn(async move {
+        if let Err(e) = endpoints_controller.run().await {
+            tracing::error!("Endpoints controller failed: {}", e);
+        }
+    });
+    
+    // Start deployment controller in background
+    let deployment_controller = DeploymentController::new(storage.clone());
+    tokio::spawn(async move {
+        if let Err(e) = deployment_controller.run().await {
+            tracing::error!("Deployment controller failed: {}", e);
+        }
+    });
+    
+    // Start replicaset controller in background
+    let replicaset_controller = ReplicaSetController::new(storage.clone());
+    tokio::spawn(async move {
+        if let Err(e) = replicaset_controller.run().await {
+            tracing::error!("ReplicaSet controller failed: {}", e);
+        }
+    });
     
     tracing::info!("Starting API server on port 6443");
     start_server(storage).await?;

@@ -1,11 +1,19 @@
+pub mod deployment_store;
+pub mod endpoints_store;
 pub mod pod_store;
+pub mod replicaset_store;
+pub mod service_store;
 pub mod watch_store;
 
 use anyhow::Result;
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 use std::sync::Arc;
 
+use self::deployment_store::DeploymentStore;
+use self::endpoints_store::EndpointsStore;
 use self::pod_store::PodStore;
+use self::replicaset_store::ReplicaSetStore;
+use self::service_store::ServiceStore;
 use self::watch_store::WatchStore;
 
 #[derive(Clone)]
@@ -32,6 +40,22 @@ impl Storage {
 
     pub fn pods(&self) -> PodStore {
         PodStore::new((*self.pool).clone())
+    }
+
+    pub fn services(&self) -> ServiceStore {
+        ServiceStore::new((*self.pool).clone())
+    }
+
+    pub fn endpoints(&self) -> EndpointsStore {
+        EndpointsStore::new((*self.pool).clone())
+    }
+
+    pub fn deployments(&self) -> DeploymentStore {
+        DeploymentStore::new((*self.pool).clone())
+    }
+
+    pub fn replicasets(&self) -> ReplicaSetStore {
+        ReplicaSetStore::new((*self.pool).clone())
     }
 
     pub fn watch(&self) -> WatchStore {

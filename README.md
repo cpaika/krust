@@ -1,97 +1,44 @@
 # Krust - Kubernetes in Rust
 
-A minimal Kubernetes implementation in Rust that conforms to the Kubernetes API and works with `kubectl`.
-
-## Features Implemented
-
-✅ **Core API Server**
-- Kubernetes-compatible REST API on port 6443
-- Health endpoints (`/healthz`, `/livez`, `/readyz`)
-- API discovery endpoints
-- Full CRUD operations for Pods
-
-✅ **Pod Management**
-- Create, Read, Update, Delete pods via kubectl
-- Pod metadata and labels support
-- Namespace support (default namespace implemented)
-- Resource versioning
-
-✅ **Storage Layer**
-- SQLite-based persistence
-- Event recording for audit trail
-- Watch functionality for real-time updates
-
-✅ **Scheduler**
-- Automatic pod scheduling to single node
-- Assigns pending pods to available node
-
-✅ **Container Runtime Integration**
-- Docker integration via bollard
-- Container lifecycle management
-- Pod to container mapping
-
-✅ **kubectl Compatibility**
-- Works with standard kubectl commands
-- Supports apply, get, delete, describe operations
-- Node listing and management
+A minimal Kubernetes API that runs on your laptop.
 
 ## Quick Start
 
-1. **Build the project:**
+### 1. Install Rust
 ```bash
-cargo build
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
 ```
 
-2. **Run the server:**
+### 2. Run Krust
 ```bash
 cargo run
 ```
 
-3. **Use kubectl:**
+### 3. Configure kubectl
 ```bash
-# Get nodes
-kubectl --server=http://localhost:6443 get nodes
-
-# Create a pod
-kubectl --server=http://localhost:6443 apply -f pod.yaml --validate=false
-
-# List pods
-kubectl --server=http://localhost:6443 get pods
-
-# Delete a pod
-kubectl --server=http://localhost:6443 delete pod <pod-name>
+kubectl config set-cluster krust --server=http://localhost:6443
+kubectl config set-context krust --cluster=krust
+kubectl config use-context krust
 ```
 
-## Architecture
-
-- **API Server**: Handles all Kubernetes API requests
-- **Scheduler**: Assigns pods to the single node
-- **Kubelet**: Manages container lifecycle (requires Docker)
-- **Storage**: SQLite database for persistent state
-- **Watch**: Server-sent events for real-time updates
-
-## Testing
-
+### 4. Deploy the demo app
 ```bash
-# Run unit tests
-cargo test
-
-# Run integration tests with kubectl
-cargo test --test kubectl_integration_test -- --ignored --nocapture
+kubectl apply -f demo.yaml
 ```
 
-## Limitations
+### 5. Check your pods
+```bash
+kubectl get pods
+```
 
-- Single node only
-- Limited to core v1 API resources (primarily Pods)
-- No authentication/authorization
-- No networking between pods
-- Services and Deployments are stubbed but not fully implemented
-- Requires `--validate=false` flag with kubectl (no OpenAPI schema)
+## What's included
 
-## Dependencies
+- Pods, Deployments, Services, ReplicaSets
+- Docker container runtime
+- SQLite storage
+- Works with real kubectl
 
-- Rust 1.75+
-- SQLite
-- Docker (optional, for actually running containers)
-- kubectl (for testing)
+## Stop Krust
+
+Press `Ctrl+C` in the terminal running `cargo run`.

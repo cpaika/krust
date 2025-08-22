@@ -25,6 +25,16 @@ futures = "0.3"
 base64 = "0.21"
 async-stream = "0.3"
 tokio-stream = "0.1"
+prost = "0.12"
+prost-types = "0.12"
+axum-extra = { version = "0.9", features = ["typed-header"] }
+tokio-tungstenite = "0.21"
+bytes = "1.5"
+lazy_static = "1.4"
+reqwest = { version = "0.11", features = ["json"] }
+
+[build-dependencies]
+prost-build = "0.12"
 
 [dev-dependencies]
 reqwest = { version = "0.11", features = ["json"] }
