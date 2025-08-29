@@ -12,14 +12,20 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::Storage;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct AppState {
     pub storage: Storage,
+    pub container_runtime: Arc<crate::runtime::container::ContainerRuntime>,
 }
 
 pub async fn start_server(storage: Storage) -> anyhow::Result<()> {
-    let state = AppState { storage };
+    let container_runtime = Arc::new(crate::runtime::container::ContainerRuntime::new());
+    let state = AppState { 
+        storage,
+        container_runtime,
+    };
 
     let app = Router::new()
         .route("/livez", get(liveness))
@@ -30,17 +36,34 @@ pub async fn start_server(storage: Storage) -> anyhow::Result<()> {
         .route("/api/v1", get(api_v1_resources))
         .route("/apis", get(api_groups))
         .route("/apis/apps/v1", get(apps_v1_resources))
+        .route("/apis/batch/v1", get(batch_v1_resources))
+        .route("/apis/networking.k8s.io/v1", get(networking_v1_resources))
+        .route("/apis/autoscaling/v2", get(autoscaling_v2_resources))
+        .route("/apis/rbac.authorization.k8s.io/v1", get(rbac_v1_resources))
+        .route("/apis/policy/v1", get(policy_v1_resources))
+        .route("/apis/scheduling.k8s.io/v1", get(scheduling_v1_resources))
+        .route("/apis/storage.k8s.io/v1", get(storage_v1_resources))
+        .route("/apis/admissionregistration.k8s.io/v1", get(admissionregistration_v1_resources))
         .route("/openapi/v2", get(openapi_v2))
         .route("/swagger.json", get(openapi_v2))  // kubectl looks here too
         .route("/openapi/v3", get(openapi_v3_discovery))
         .route("/openapi/v3.0", get(openapi_v3_discovery))
         .nest("/api/v1", super::routes::v1_routes())
         .nest("/apis/apps/v1", super::routes::apps_v1_routes())
+        .nest("/apis/batch/v1", super::routes::batch_v1_routes())
+        .nest("/apis/networking.k8s.io/v1", super::routes::networking_v1_routes())
+        .nest("/apis/autoscaling/v2", super::routes::autoscaling_v2_routes())
+        .nest("/apis/rbac.authorization.k8s.io/v1", super::routes::rbac_v1_routes())
+        .nest("/apis/policy/v1", super::routes::policy_v1_routes())
+        .nest("/apis/scheduling.k8s.io/v1", super::routes::scheduling_v1_routes())
+        .nest("/apis/storage.k8s.io/v1", super::routes::storage_v1_routes())
+        .nest("/apis/admissionregistration.k8s.io/v1", super::routes::admissionregistration_v1_routes())
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(state);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 6443));
+    // Bind to both IPv4 and IPv6
+    let addr = "0.0.0.0:6443";
     tracing::info!("Krust API server listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
@@ -133,6 +156,44 @@ async fn api_v1_resources() -> Json<Value> {
                 "kind": "Node",
                 "verbs": ["get", "list", "patch", "update", "watch"],
                 "shortNames": ["no"]
+            },
+            {
+                "name": "resourcequotas",
+                "singularName": "resourcequota",
+                "namespaced": true,
+                "kind": "ResourceQuota",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["quota"]
+            },
+            {
+                "name": "resourcequotas/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "ResourceQuota",
+                "verbs": ["get", "patch", "update"]
+            },
+            {
+                "name": "limitranges",
+                "singularName": "limitrange",
+                "namespaced": true,
+                "kind": "LimitRange",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["limits"]
+            },
+            {
+                "name": "serviceaccounts",
+                "singularName": "serviceaccount",
+                "namespaced": true,
+                "kind": "ServiceAccount",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["sa"]
+            },
+            {
+                "name": "serviceaccounts/token",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "TokenRequest",
+                "verbs": ["create"]
             }
         ]
     }))
@@ -153,6 +214,110 @@ async fn api_groups() -> Json<Value> {
                 ],
                 "preferredVersion": {
                     "groupVersion": "apps/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "batch",
+                "versions": [
+                    {
+                        "groupVersion": "batch/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "batch/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "networking.k8s.io",
+                "versions": [
+                    {
+                        "groupVersion": "networking.k8s.io/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "networking.k8s.io/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "autoscaling",
+                "versions": [
+                    {
+                        "groupVersion": "autoscaling/v2",
+                        "version": "v2"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "autoscaling/v2",
+                    "version": "v2"
+                }
+            },
+            {
+                "name": "rbac.authorization.k8s.io",
+                "versions": [
+                    {
+                        "groupVersion": "rbac.authorization.k8s.io/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "rbac.authorization.k8s.io/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "policy",
+                "versions": [
+                    {
+                        "groupVersion": "policy/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "policy/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "scheduling.k8s.io",
+                "versions": [
+                    {
+                        "groupVersion": "scheduling.k8s.io/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "scheduling.k8s.io/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "storage.k8s.io",
+                "versions": [
+                    {
+                        "groupVersion": "storage.k8s.io/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "storage.k8s.io/v1",
+                    "version": "v1"
+                }
+            },
+            {
+                "name": "admissionregistration.k8s.io",
+                "versions": [
+                    {
+                        "groupVersion": "admissionregistration.k8s.io/v1",
+                        "version": "v1"
+                    }
+                ],
+                "preferredVersion": {
+                    "groupVersion": "admissionregistration.k8s.io/v1",
                     "version": "v1"
                 }
             }
@@ -197,6 +362,226 @@ async fn apps_v1_resources() -> Json<Value> {
                 "kind": "DaemonSet",
                 "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
                 "shortNames": ["ds"]
+            }
+        ]
+    }))
+}
+
+async fn batch_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "batch/v1",
+        "groupVersion": "batch/v1",
+        "resources": [
+            {
+                "name": "jobs",
+                "singularName": "job",
+                "namespaced": true,
+                "kind": "Job",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            },
+            {
+                "name": "jobs/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "Job",
+                "verbs": ["get", "patch", "update"]
+            },
+            {
+                "name": "cronjobs",
+                "singularName": "cronjob",
+                "namespaced": true,
+                "kind": "CronJob",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["cj"]
+            },
+            {
+                "name": "cronjobs/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "CronJob",
+                "verbs": ["get", "patch", "update"]
+            }
+        ]
+    }))
+}
+
+async fn networking_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "networking.k8s.io/v1",
+        "groupVersion": "networking.k8s.io/v1",
+        "resources": [
+            {
+                "name": "networkpolicies",
+                "singularName": "networkpolicy",
+                "namespaced": true,
+                "kind": "NetworkPolicy",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["netpol"]
+            },
+            {
+                "name": "ingresses",
+                "singularName": "ingress",
+                "namespaced": true,
+                "kind": "Ingress",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["ing"]
+            },
+            {
+                "name": "ingresses/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "Ingress",
+                "verbs": ["get", "patch", "update"]
+            }
+        ]
+    }))
+}
+
+async fn autoscaling_v2_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "autoscaling/v2",
+        "groupVersion": "autoscaling/v2",
+        "resources": [
+            {
+                "name": "horizontalpodautoscalers",
+                "singularName": "horizontalpodautoscaler",
+                "namespaced": true,
+                "kind": "HorizontalPodAutoscaler",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["hpa"]
+            },
+            {
+                "name": "horizontalpodautoscalers/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "HorizontalPodAutoscaler",
+                "verbs": ["get", "patch", "update"]
+            }
+        ]
+    }))
+}
+
+async fn policy_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "policy/v1",
+        "groupVersion": "policy/v1",
+        "resources": [
+            {
+                "name": "poddisruptionbudgets",
+                "singularName": "poddisruptionbudget",
+                "namespaced": true,
+                "kind": "PodDisruptionBudget",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["pdb"]
+            },
+            {
+                "name": "poddisruptionbudgets/status",
+                "singularName": "",
+                "namespaced": true,
+                "kind": "PodDisruptionBudget",
+                "verbs": ["get", "patch", "update"]
+            }
+        ]
+    }))
+}
+
+async fn rbac_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "groupVersion": "rbac.authorization.k8s.io/v1",
+        "resources": [
+            {
+                "name": "roles",
+                "singularName": "role",
+                "namespaced": true,
+                "kind": "Role",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            },
+            {
+                "name": "rolebindings",
+                "singularName": "rolebinding",
+                "namespaced": true,
+                "kind": "RoleBinding",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            },
+            {
+                "name": "clusterroles",
+                "singularName": "clusterrole",
+                "namespaced": false,
+                "kind": "ClusterRole",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            },
+            {
+                "name": "clusterrolebindings",
+                "singularName": "clusterrolebinding",
+                "namespaced": false,
+                "kind": "ClusterRoleBinding",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            }
+        ]
+    }))
+}
+
+async fn scheduling_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "scheduling.k8s.io/v1",
+        "groupVersion": "scheduling.k8s.io/v1",
+        "resources": [
+            {
+                "name": "priorityclasses",
+                "singularName": "priorityclass",
+                "namespaced": false,
+                "kind": "PriorityClass",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["pc"]
+            }
+        ]
+    }))
+}
+
+async fn storage_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "storage.k8s.io/v1",
+        "groupVersion": "storage.k8s.io/v1",
+        "resources": [
+            {
+                "name": "storageclasses",
+                "singularName": "storageclass",
+                "namespaced": false,
+                "kind": "StorageClass",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"],
+                "shortNames": ["sc"]
+            }
+        ]
+    }))
+}
+
+async fn admissionregistration_v1_resources() -> Json<Value> {
+    Json(json!({
+        "kind": "APIResourceList",
+        "apiVersion": "admissionregistration.k8s.io/v1",
+        "groupVersion": "admissionregistration.k8s.io/v1",
+        "resources": [
+            {
+                "name": "validatingwebhookconfigurations",
+                "singularName": "validatingwebhookconfiguration",
+                "namespaced": false,
+                "kind": "ValidatingWebhookConfiguration",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
+            },
+            {
+                "name": "mutatingwebhookconfigurations",
+                "singularName": "mutatingwebhookconfiguration",
+                "namespaced": false,
+                "kind": "MutatingWebhookConfiguration",
+                "verbs": ["create", "delete", "get", "list", "patch", "update", "watch"]
             }
         ]
     }))

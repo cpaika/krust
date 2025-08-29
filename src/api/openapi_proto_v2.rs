@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use prost::Message;
 use serde_json::Value;
 use std::collections::HashMap;

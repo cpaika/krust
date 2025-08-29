@@ -200,17 +200,20 @@ impl EndpointsStore {
         Ok(endpoints)
     }
 
-    pub async fn delete(&self, namespace: &str, name: &str) -> Result<()> {
-        let endpoints = self.get(namespace, name).await?;
-        let uid = endpoints["metadata"]["uid"].as_str().unwrap();
+    pub async fn delete(&self, namespace: &str, name: &str) -> Result<Value> {
+        let mut endpoints = self.get(namespace, name).await?;
+        let uid = endpoints["metadata"]["uid"].as_str().unwrap().to_string();
         
         let now = Utc::now().to_rfc3339();
+        
+        // Set deletion timestamp in the object
+        endpoints["metadata"]["deletionTimestamp"] = json!(now.clone());
         
         sqlx::query(
             "UPDATE endpoints SET deletion_timestamp = ? WHERE uid = ?"
         )
         .bind(&now)
-        .bind(uid)
+        .bind(&uid)
         .execute(&self.pool)
         .await?;
         
@@ -219,9 +222,9 @@ impl EndpointsStore {
             .as_str()
             .unwrap()
             .parse::<i64>()?;
-        self.record_event("endpoints", uid, name, namespace, "DELETED", resource_version, &endpoints).await?;
+        self.record_event("endpoints", &uid, name, namespace, "DELETED", resource_version, &endpoints).await?;
         
-        Ok(())
+        Ok(endpoints)
     }
 
     async fn record_event(&self, resource_type: &str, uid: &str, name: &str, namespace: &str, event_type: &str, version: i64, object: &Value) -> Result<()> {

@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.7", features = ["macros"] }
+axum = { version = "0.7", features = ["macros", "ws"] }
+hyper = { version = "1", features = ["full"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
 tokio = { version = "1", features = ["full"] }
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "migrate"] }
 serde = { version = "1", features = ["derive"] }
@@ -32,6 +34,7 @@ tokio-tungstenite = "0.21"
 bytes = "1.5"
 lazy_static = "1.4"
 reqwest = { version = "0.11", features = ["json"] }
+json-patch = "1.2"
 
 [build-dependencies]
 prost-build = "0.12"
@@ -40,3 +43,31 @@ prost-build = "0.12"
 reqwest = { version = "0.11", features = ["json"] }
 tempfile = "3"
 serial_test = "3"
+
+# Define which test files to include
+[[test]]
+name = "integration_test"
+path = "tests/integration_test.rs"
+
+[[test]]
+name = "edge_cases"
+path = "tests/edge_cases_test.rs"
+
+[[test]]
+name = "tdd_validation"
+path = "tests/tdd_validation_test.rs"
+
+# Mark other tests as ignored by default
+[[test]]
+name = "configmap"
+path = "tests/configmap_test.rs"
+required-features = ["test-server"]
+
+[[test]]
+name = "secret"
+path = "tests/secret_test.rs"
+required-features = ["test-server"]
+
+[features]
+default = []
+test-server = []  # Feature flag for tests requiring running server

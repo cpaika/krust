@@ -369,6 +369,119 @@ impl PodStore {
         Ok(())
     }
     
+    pub async fn set_status(&self, namespace: &str, name: &str, status: Value) -> Result<Value> {
+        let mut pod = self.get(namespace, name).await?;
+        let uid = pod["metadata"]["uid"].as_str().unwrap().to_string();
+        let current_version: i64 = pod["metadata"]["resourceVersion"]
+            .as_str()
+            .unwrap()
+            .parse()?;
+        
+        let new_version = current_version + 1;
+        
+        // Update the status
+        pod["status"] = status.clone();
+        pod["metadata"]["resourceVersion"] = json!(new_version.to_string());
+        
+        // Update in database
+        sqlx::query(
+            "UPDATE pods SET status = ?, resource_version = ? WHERE uid = ?"
+        )
+        .bind(status.to_string())
+        .bind(new_version)
+        .bind(&uid)
+        .execute(&self.pool)
+        .await?;
+        
+        // Record event
+        self.record_event("Pod", &uid, name, namespace, "MODIFIED", new_version, &pod).await?;
+        
+        Ok(pod)
+    }
+    
+    pub async fn get_status(&self, namespace: &str, name: &str) -> Result<Value> {
+        self.get(namespace, name).await
+    }
+    
+    pub async fn update_ephemeral_containers(&self, namespace: &str, name: &str, ephemeral_containers: Value) -> Result<Value> {
+        let mut pod = self.get(namespace, name).await?;
+        let uid = pod["metadata"]["uid"].as_str().unwrap().to_string();
+        let current_version: i64 = pod["metadata"]["resourceVersion"]
+            .as_str()
+            .unwrap()
+            .parse()?;
+        
+        let new_version = current_version + 1;
+        
+        // Add ephemeral containers to spec
+        pod["spec"]["ephemeralContainers"] = ephemeral_containers;
+        pod["metadata"]["resourceVersion"] = json!(new_version.to_string());
+        
+        let spec = pod["spec"].to_string();
+        
+        // Update in database
+        sqlx::query(
+            "UPDATE pods SET spec = ?, resource_version = ? WHERE uid = ?"
+        )
+        .bind(spec)
+        .bind(new_version)
+        .bind(&uid)
+        .execute(&self.pool)
+        .await?;
+        
+        // Record event
+        self.record_event("Pod", &uid, name, namespace, "MODIFIED", new_version, &pod).await?;
+        
+        Ok(pod)
+    }
+    
+    pub async fn bind_to_node(&self, namespace: &str, name: &str, node_name: &str) -> Result<()> {
+        let mut pod = self.get(namespace, name).await?;
+        let uid = pod["metadata"]["uid"].as_str().unwrap().to_string();
+        let current_version: i64 = pod["metadata"]["resourceVersion"]
+            .as_str()
+            .unwrap()
+            .parse()?;
+        
+        let new_version = current_version + 1;
+        
+        // Set nodeName in spec
+        pod["spec"]["nodeName"] = json!(node_name);
+        pod["metadata"]["resourceVersion"] = json!(new_version.to_string());
+        
+        // Update status to scheduled
+        pod["status"]["phase"] = json!("Pending");
+        pod["status"]["conditions"] = json!([
+            {
+                "type": "PodScheduled",
+                "status": "True",
+                "lastTransitionTime": Utc::now().to_rfc3339(),
+                "reason": "Scheduled",
+                "message": format!("Successfully assigned to {}", node_name)
+            }
+        ]);
+        
+        let spec = pod["spec"].to_string();
+        let status = pod["status"].to_string();
+        
+        // Update in database
+        sqlx::query(
+            "UPDATE pods SET spec = ?, status = ?, node_name = ?, resource_version = ? WHERE uid = ?"
+        )
+        .bind(spec)
+        .bind(status)
+        .bind(node_name)
+        .bind(new_version)
+        .bind(&uid)
+        .execute(&self.pool)
+        .await?;
+        
+        // Record event
+        self.record_event("Pod", &uid, name, namespace, "SCHEDULED", new_version, &pod).await?;
+        
+        Ok(())
+    }
+    
     fn calculate_qos_class(spec: &Value) -> &'static str {
         // Kubernetes QoS classes:
         // - Guaranteed: Every container has memory/cpu limits and requests, and they are equal

@@ -240,17 +240,20 @@ impl DeploymentStore {
         Ok(deployment)
     }
 
-    pub async fn delete(&self, namespace: &str, name: &str) -> Result<()> {
-        let deployment = self.get(namespace, name).await?;
-        let uid = deployment["metadata"]["uid"].as_str().unwrap();
+    pub async fn delete(&self, namespace: &str, name: &str) -> Result<Value> {
+        let mut deployment = self.get(namespace, name).await?;
+        let uid = deployment["metadata"]["uid"].as_str().unwrap().to_string();
         
         let now = Utc::now().to_rfc3339();
+        
+        // Set deletion timestamp in the object
+        deployment["metadata"]["deletionTimestamp"] = json!(now.clone());
         
         sqlx::query(
             "UPDATE deployments SET deletion_timestamp = ? WHERE uid = ?"
         )
         .bind(&now)
-        .bind(uid)
+        .bind(&uid)
         .execute(&self.pool)
         .await?;
         
@@ -259,9 +262,9 @@ impl DeploymentStore {
             .as_str()
             .unwrap()
             .parse::<i64>()?;
-        self.record_event("deployments", uid, name, namespace, "DELETED", resource_version, &deployment).await?;
+        self.record_event("deployments", &uid, name, namespace, "DELETED", resource_version, &deployment).await?;
         
-        Ok(())
+        Ok(deployment)
     }
 
     pub async fn update_status(&self, namespace: &str, name: &str, status: Value) -> Result<()> {

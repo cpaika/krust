@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 // Simple HTTP proxy to expose pod containers
 use axum::{
     extract::{Path, State},

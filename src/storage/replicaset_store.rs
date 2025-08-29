@@ -4,6 +4,25 @@ use serde_json::{json, Value};
 use sqlx::{Row, SqlitePool};
 use uuid::Uuid;
 
+fn merge_json(target: &mut Value, patch: &Value) {
+    match (target, patch) {
+        (Value::Object(target_map), Value::Object(patch_map)) => {
+            for (key, value) in patch_map {
+                if value.is_null() {
+                    target_map.remove(key);
+                } else if let Some(target_value) = target_map.get_mut(key) {
+                    merge_json(target_value, value);
+                } else {
+                    target_map.insert(key.clone(), value.clone());
+                }
+            }
+        }
+        (target, patch) => {
+            *target = patch.clone();
+        }
+    }
+}
+
 pub struct ReplicaSetStore {
     pool: SqlitePool,
 }
@@ -194,6 +213,146 @@ impl ReplicaSetStore {
         }))
     }
 
+    pub async fn update(&self, namespace: &str, name: &str, mut replicaset: Value) -> Result<Value> {
+        // Get existing ReplicaSet to preserve UID and creation timestamp
+        let existing = self.get(namespace, name).await?;
+        let uid = existing["metadata"]["uid"].as_str().unwrap();
+        let creation_timestamp = existing["metadata"]["creationTimestamp"].as_str().unwrap();
+        let current_version: i64 = existing["metadata"]["resourceVersion"]
+            .as_str()
+            .unwrap()
+            .parse()?;
+        
+        let new_version = current_version + 1;
+        let new_generation = existing["metadata"]["generation"].as_i64().unwrap() + 1;
+        
+        // Update metadata
+        replicaset["metadata"]["uid"] = json!(uid);
+        replicaset["metadata"]["namespace"] = json!(namespace);
+        replicaset["metadata"]["name"] = json!(name);
+        replicaset["metadata"]["resourceVersion"] = json!(new_version.to_string());
+        replicaset["metadata"]["generation"] = json!(new_generation);
+        replicaset["metadata"]["creationTimestamp"] = json!(creation_timestamp);
+        replicaset["metadata"]["selfLink"] = json!(format!("/apis/apps/v1/namespaces/{}/replicasets/{}", namespace, name));
+        
+        // Preserve status
+        replicaset["status"] = existing["status"].clone();
+        
+        let labels = replicaset["metadata"]["labels"].to_string();
+        let annotations = replicaset["metadata"]["annotations"].to_string();
+        let spec = replicaset["spec"].to_string();
+        let owner_references = replicaset["metadata"]["ownerReferences"].to_string();
+        
+        sqlx::query(
+            "UPDATE replicasets SET spec = ?, labels = ?, annotations = ?, owner_references = ?, resource_version = ?, generation = ? WHERE uid = ?"
+        )
+        .bind(&spec)
+        .bind(&labels)
+        .bind(&annotations)
+        .bind(&owner_references)
+        .bind(new_version)
+        .bind(new_generation)
+        .bind(uid)
+        .execute(&self.pool)
+        .await?;
+        
+        // Record event
+        self.record_event("replicasets", uid, name, namespace, "MODIFIED", new_version, &replicaset).await?;
+        
+        Ok(replicaset)
+    }
+
+    pub async fn patch(&self, namespace: &str, name: &str, patch: Value) -> Result<Value> {
+        let mut existing = self.get(namespace, name).await?;
+        
+        // Apply JSON merge patch manually
+        if let Some(obj) = patch.as_object() {
+            for (key, value) in obj {
+                if let Some(target) = existing.get_mut(key) {
+                    merge_json(target, value);
+                } else {
+                    existing[key] = value.clone();
+                }
+            }
+        }
+        
+        // Update the ReplicaSet
+        self.update(namespace, name, existing).await
+    }
+    
+    pub async fn update_scale(&self, namespace: &str, name: &str, replicas: i64) -> Result<Value> {
+        let mut replicaset = self.get(namespace, name).await?;
+        let uid = replicaset["metadata"]["uid"]
+            .as_str()
+            .ok_or_else(|| anyhow!("Missing UID"))?
+            .to_string();
+        let current_version: i64 = replicaset["metadata"]["resourceVersion"]
+            .as_str()
+            .unwrap()
+            .parse()?;
+        
+        let new_version = current_version + 1;
+        
+        // Update replicas in spec
+        replicaset["spec"]["replicas"] = json!(replicas);
+        replicaset["metadata"]["resourceVersion"] = json!(new_version.to_string());
+        
+        let spec = replicaset["spec"].to_string();
+        
+        sqlx::query(
+            "UPDATE replicasets SET spec = ?, resource_version = ? WHERE uid = ?"
+        )
+        .bind(&spec)
+        .bind(new_version)
+        .bind(&uid)
+        .execute(&self.pool)
+        .await?;
+        
+        // Record event
+        self.record_event("replicasets", &uid, name, namespace, "MODIFIED", new_version, &replicaset).await?;
+        
+        // Return scale object
+        Ok(json!({
+            "apiVersion": "autoscaling/v1",
+            "kind": "Scale",
+            "metadata": {
+                "name": name,
+                "namespace": namespace,
+                "uid": uid,
+                "resourceVersion": new_version.to_string()
+            },
+            "spec": {
+                "replicas": replicas
+            },
+            "status": {
+                "replicas": replicaset["status"]["replicas"],
+                "selector": replicaset["spec"]["selector"]
+            }
+        }))
+    }
+
+    pub async fn get_scale(&self, namespace: &str, name: &str) -> Result<Value> {
+        let replicaset = self.get(namespace, name).await?;
+        
+        Ok(json!({
+            "apiVersion": "autoscaling/v1",
+            "kind": "Scale",
+            "metadata": {
+                "name": name,
+                "namespace": namespace,
+                "uid": replicaset["metadata"]["uid"],
+                "resourceVersion": replicaset["metadata"]["resourceVersion"]
+            },
+            "spec": {
+                "replicas": replicaset["spec"]["replicas"]
+            },
+            "status": {
+                "replicas": replicaset["status"]["replicas"],
+                "selector": replicaset["spec"]["selector"]
+            }
+        }))
+    }
+
     pub async fn update_status(&self, namespace: &str, name: &str, status: Value) -> Result<()> {
         let replicaset = self.get(namespace, name).await?;
         let uid = replicaset["metadata"]["uid"].as_str().unwrap();
@@ -209,7 +368,7 @@ impl ReplicaSetStore {
         Ok(())
     }
 
-    pub async fn delete(&self, namespace: &str, name: &str) -> Result<()> {
+    pub async fn delete(&self, namespace: &str, name: &str) -> Result<Value> {
         let replicaset = self.get(namespace, name).await?;
         let uid = replicaset["metadata"]["uid"].as_str().unwrap();
         
@@ -230,7 +389,7 @@ impl ReplicaSetStore {
             .parse::<i64>()?;
         self.record_event("replicasets", uid, name, namespace, "DELETED", resource_version, &replicaset).await?;
         
-        Ok(())
+        Ok(replicaset)
     }
 
     async fn record_event(&self, resource_type: &str, uid: &str, name: &str, namespace: &str, event_type: &str, version: i64, object: &Value) -> Result<()> {

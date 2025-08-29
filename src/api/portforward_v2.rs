@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use axum::{
     extract::{ws::WebSocket, Path, Query, State, WebSocketUpgrade},
     http::{HeaderMap, StatusCode},
@@ -6,8 +7,6 @@ use axum::{
 use bollard::Docker;
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
-use std::collections::HashMap;
-use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::Mutex;
@@ -95,14 +94,18 @@ async fn get_container_info(namespace: &str, name: &str) -> Option<ContainerInfo
     let docker = Docker::connect_with_local_defaults().ok()?;
     
     // Find container by pod labels
-    let filters = vec![
-        ("label", format!("io.kubernetes.pod.name={}", name).as_str()),
-        ("label", format!("io.kubernetes.pod.namespace={}", namespace).as_str()),
-    ];
+    let mut filters = std::collections::HashMap::new();
+    filters.insert(
+        "label".to_string(),
+        vec![
+            format!("io.kubernetes.pod.name={}", name),
+            format!("io.kubernetes.pod.namespace={}", namespace),
+        ],
+    );
     
     let options = bollard::container::ListContainersOptions {
         all: true,
-        filters: filters.into_iter().collect(),
+        filters,
         ..Default::default()
     };
     
